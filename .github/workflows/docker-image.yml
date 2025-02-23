@@ -24,8 +24,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@master
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub 用户名
-          password: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub 密码
+          username: ${{ $DOCKER_USERNAME }}  # Docker Hub 用户名
+          password: ${{ $DOCKER_PASSWORD }}  # Docker Hub 密码
 
       - name: Build and push Docker image
         uses: docker/build-push-action@master
