@@ -5,19 +5,12 @@ on: workflow_dispatch
 env:
   REPO_NAME: "devbox"
   REF_NAME: "latest"
-  DOCKER_USERNAME: ""
-  DOCKER_PASSWORD: ""
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Set Docker User info
-        run: |
-          echo "$DOCKER_USERNAME"
-          echo "$DOCKER_PASSWORD"
-          
+    steps:          
       - name: Checkout code
         uses: actions/checkout@master
 
@@ -27,8 +20,8 @@ jobs:
       - name: Log in to Docker Hub
         uses: docker/login-action@master
         with:
-          username: ${{ env.DOCKER_USERNAME }}  # Docker Hub 用户名
-          password: ${{ env.DOCKER_PASSWORD }}  # Docker Hub 密码
+          username: ${{ secrets.DOCKER_USERNAME }}  # Docker Hub 用户名
+          password: ${{ secrets.DOCKER_PASSWORD }}  # Docker Hub 密码
 
       - name: Build and push Docker image
         uses: docker/build-push-action@master
