@@ -1,7 +1,7 @@
 name: Docker Image CI
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
-  push:
+  status:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
@@ -17,16 +17,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Set Docker User info
+        run: |
+          echo "$DOCKER_USERNAME"
+          echo "$DOCKER_PASSWORD"
+          
       - name: Checkout code
         uses: actions/checkout@master
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@master
-
-      - name: Set Docker User info
-        run: |
-          echo "$DOCKER_USERNAME" >> env.DOCKER_USERNAME
-          echo "$DOCKER_PASSWORD" >> env.DOCKER_PASSWORD
 
       - name: Log in to Docker Hub
         uses: docker/login-action@master
