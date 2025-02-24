@@ -63,7 +63,7 @@ RUN useradd -ms /bin/zsh ${USERNAME} && passwd -d ${USERNAME}
 
 RUN usermod -aG sudo ${USERNAME}
 USER ${USERNAME}
-SHELL ["bin/sh","-c"]
+SHELL []
 RUN mkdir -p ~/.local/share/fonts
 WORKDIR /home/${USERNAME}/.local/share/fonts
 RUN curl -L "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/JetBrainsMono.zip" -o JetBrainsMono.zip && \
