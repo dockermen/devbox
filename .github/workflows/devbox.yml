@@ -1,9 +1,23 @@
-name: Docker Image CI
+name: Docker Devbox CLI
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: 
-  push:
-    branches:
-      ["main"]
+on:
+  # 添加手动触发功能
+  workflow_dispatch:
+    # 可选：添加输入参数
+    inputs:
+      environment:
+        description: '部署环境'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+        - staging
+        - production
+      debug:
+        description: '是否开启调试模式'
+        required: false
+        type: boolean
+        default: false
 
 env:
   REPO_NAME: "devbox"
