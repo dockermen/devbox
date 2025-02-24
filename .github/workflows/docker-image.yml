@@ -1,6 +1,9 @@
 name: Docker Image CI
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
-on: workflow_dispatch
+on: 
+  push:
+    branches:
+      ["main"]
 
 env:
   REPO_NAME: "devbox"
@@ -28,7 +31,7 @@ jobs:
         with:
           context: .
           push: true
-          platforms: linux/amd64,linux/arm64/v8
+          platforms: linux/amd64
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.REF_NAME }}  # 替换为你的 Docker Hub 用户名和镜像名称
           
       - name: Print Docker images
