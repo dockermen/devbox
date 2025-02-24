@@ -73,7 +73,7 @@ COPY .config/.p10k.zsh /home/${USERNAME}/.p10k.zsh
 RUN chmod a+rwx /home/${USERNAME}/.p10k.zsh
 USER ${USERNAME}
 
-RUN  echo 'export SHELL="/bin/zsh"' >> /home/${USERNAME}/.zshrc
+RUN echo 'export SHELL="/bin/zsh"' >> /home/${USERNAME}/.zshrc
 RUN git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh
 RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.powerlevel10k
 
@@ -81,7 +81,7 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.powerlev
 #                             openssh
 ######################################################################
 
-RUN echo -e '\nPermitRootLogin yes' >> /etc/ssh/sshd_config
+RUN sudo echo -e '\nPermitRootLogin yes' >> /etc/ssh/sshd_config
 RUN sudo service ssh enable
 
 ######################################################################
