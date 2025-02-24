@@ -8,20 +8,14 @@ on:
       environment:
         description: '部署环境'
         required: true
-        default: 'staging'
+        default: 'latest'
         type: choice
         options:
-        - staging
-        - production
-      debug:
-        description: '是否开启调试模式'
-        required: false
-        type: boolean
-        default: false
+        - latest
+        - jammy
 
 env:
   REPO_NAME: "devbox"
-  REF_NAME: "latest"
 
 jobs:
   build:
@@ -45,7 +39,7 @@ jobs:
         with:
           context: .
           push: true
-          file: ${{ env.REF_NAME }}Dockerfile
+          file: ${{ github.event.inputs.environment  }}Dockerfile
           platforms: linux/amd64
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ env.REF_NAME }}  # 替换为你的 Docker Hub 用户名和镜像名称
           
