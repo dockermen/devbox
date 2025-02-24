@@ -78,13 +78,6 @@ RUN git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh
 RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.powerlevel10k
 
 ######################################################################
-#                             openssh
-######################################################################
-
-RUN sudo echo -e '\nPermitRootLogin yes' >> /etc/ssh/sshd_config
-RUN sudo service ssh enable
-
-######################################################################
 #                              conda
 ######################################################################
 
