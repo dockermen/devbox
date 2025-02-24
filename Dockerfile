@@ -81,10 +81,8 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.powerlev
 #                             openssh
 ######################################################################
 
-RUN /bin/sh -c service ssh start
-RUN /bin/sh -c service ssh enable
 RUN echo -e '\nPermitRootLogin yes' >> /etc/ssh/sshd_config
-RUN /bin/sh -c service ssh restart
+RUN sudo service ssh enable
 
 ######################################################################
 #                              conda
