@@ -78,19 +78,6 @@ RUN git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh
 RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.powerlevel10k
 
 ######################################################################
-#                             openssh
-######################################################################
-
-# RUN echo -e '\nPermitRootLogin yes' >> /etc/ssh/sshd_config
-######################################################################
-#                              conda
-######################################################################
-RUN cd ~
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-
-RUN bash ./Miniconda3-latest-Linux-x86_64.sh -b
-RUN echo 'export PATH="$PATH:/home/'"${USERNAME}"'/miniconda3/bin"' >> ~/.zshrc
-######################################################################
 #                               RUST
 ######################################################################
 
@@ -169,6 +156,25 @@ RUN ~/.bin/nvim/bin/nvim --headless "+TSInstallSync! rust python" +qa
 # functions does not seem to work.
 RUN ~/.bin/nvim/bin/nvim --headless -c "edit tmp.py" -c "lua vim.wait(15000)" -c "quit"
 
+
+
+######################################################################
+#                             openssh
+######################################################################
+USER root
+RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
+RUN echo 'sudo service ssh start' >> /home/${USERNAME}/.zshrc
+# RUN sudo service ssh enable
+# RUN sudo service ssh start
+######################################################################
+#                              conda
+######################################################################
+USER ${USERNAME}
+RUN cd ~
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+
+RUN bash ./Miniconda3-latest-Linux-x86_64.sh -b
+RUN echo 'export PATH="$PATH:/home/'"${USERNAME}"'/miniconda3/bin"' >> /home/${USERNAME}/.zshrc
 ######################################################################
 #                               FINISH
 ######################################################################
