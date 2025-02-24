@@ -32,6 +32,8 @@ RUN apt-get update -y && apt-get upgrade -y && apt-get install -y \
   luarocks \
   make \
   pip \
+  golang \
+  openssh-server \
   python3 \
   python3.12-venv \
   npm \
@@ -75,6 +77,24 @@ RUN  echo 'export SHELL="/bin/zsh"' >> /home/${USERNAME}/.zshrc
 RUN git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh
 RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.powerlevel10k
 
+######################################################################
+#                             openssh
+######################################################################
+
+RUN service ssh start
+RUN service ssh enable
+RUN echo -e '\nPermitRootLogin yes' >> /etc/ssh/sshd_config
+RUN service ssh restart
+
+######################################################################
+#                              conda
+######################################################################
+
+RUN cd ~
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
+RUN bash ./Miniconda3-latest-Linux-x86_64.sh -b
+RUN echo -e '\nPATH="/home/'${USERNAME}'/miniconda3/bin:$PATH"' >> ~/.bashrc
+RUN source ~/.bashrc
 ######################################################################
 #                               RUST
 ######################################################################
