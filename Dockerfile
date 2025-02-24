@@ -47,15 +47,6 @@ RUN apt-get update -y && apt-get upgrade -y && apt-get install -y \
   zsh
 
 
-######################################################################
-#                              conda
-######################################################################
-RUN cd ~
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-SHELL ["bin/bash","-c"]
-RUN bash ./Miniconda3-latest-Linux-x86_64.sh -b
-RUN echo -e '\nPATH="/home/'${USERNAME}'/miniconda3/bin:$PATH"' >> ~/.bashrc
-RUN source ~/.bashrc
 RUN chsh -s $(which zsh)
 
 # Set empty password by default
@@ -63,7 +54,6 @@ RUN useradd -ms /bin/zsh ${USERNAME} && passwd -d ${USERNAME}
 
 RUN usermod -aG sudo ${USERNAME}
 USER ${USERNAME}
-SHELL []
 RUN mkdir -p ~/.local/share/fonts
 WORKDIR /home/${USERNAME}/.local/share/fonts
 RUN curl -L "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/JetBrainsMono.zip" -o JetBrainsMono.zip && \
@@ -92,7 +82,14 @@ RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.powerlev
 ######################################################################
 
 # RUN echo -e '\nPermitRootLogin yes' >> /etc/ssh/sshd_config
+######################################################################
+#                              conda
+######################################################################
+RUN cd ~
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
 
+RUN bash ./Miniconda3-latest-Linux-x86_64.sh -b
+RUN echo 'export PATH="$PATH:/home/'"${USERNAME}"'/miniconda3/bin"' >> ~/.zshrc
 ######################################################################
 #                               RUST
 ######################################################################
