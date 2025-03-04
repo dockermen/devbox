@@ -7,177 +7,78 @@
 #
 ######################################################################
 
+
+
 FROM ubuntu:latest
 
-ENV USERNAME="zhilong"
-ENV NEOVIM_RELEASE_VERSION="0.10.1"
-ENV NEOVIM_SHA256="4867de01a17f6083f902f8aa5215b40b0ed3a36e83cc0293de3f11708f1f9793"
-ENV LAZYGIT_VERSION="0.44.1"
-ENV YAZI_VERSION="0.4.1"
-ENV GIT_USERNAME="ZhiLong_Devbox"
-ENV GIT_EMAIL="719565847@qq.com"
-ENV GIT_DEFAULT_BRANCH="main"
-ENV TZ="America/Los_Angeles"
+# 避免交互式提示
+ENV DEBIAN_FRONTEND=noninteractive
 
-######################################################################
-#                               PACKAGES
-######################################################################
+# 安装基础工具并清理缓存
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    sudo \
+    tar \
+    git \
+    openssh-server \
+    unzip \
+    vim \
+    curl \
+    wget \
+    iputils-ping \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    # 设置SSH服务
+    && mkdir /var/run/sshd \
+    && echo 'root:chen1234' | chpasswd \
+    && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
+    && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
-RUN apt-get update -y && apt-get upgrade -y && apt-get install -y \
-  clang \
-  curl \
-  fd-find \
-  fontconfig \
-  git \
-  luarocks \
-  make \
-  pip \
-  golang \
-  openssh-server \
-  python3 \
-  python3.12-venv \
-  npm \
-  nodejs \
-  ripgrep \
-  sudo \
-  tar \
-  unzip \
-  wget \
-  vim \
-  zsh
+# 安装Miniconda、配置环境变量和镜像
+RUN wget --no-check-certificate https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh \
+    && bash /tmp/miniconda.sh -b -p /opt/conda \
+    && rm /tmp/miniconda.sh \
+    && /opt/conda/bin/conda clean -afy \
+    && ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
+    && echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc \
+    && echo "conda activate base" >> ~/.bashrc \
+    # 配置pip镜像
+    && mkdir -p ~/.pip \
+    && echo "[global]" > ~/.pip/pip.conf \
+    && echo "index-url = https://pypi.tuna.tsinghua.edu.cn/simple" >> ~/.pip/pip.conf \
+    && echo "trusted-host = pypi.tuna.tsinghua.edu.cn" >> ~/.pip/pip.conf
 
+# 设置Conda环境变量
+ENV PATH="/opt/conda/bin:$PATH"
 
-RUN chsh -s $(which zsh)
+# 安装Golang并配置环境变量
+RUN wget --no-check-certificate https://go.dev/dl/go1.21.0.linux-amd64.tar.gz -O /tmp/go.tar.gz \
+    && tar -C /usr/local -xzf /tmp/go.tar.gz \
+    && rm /tmp/go.tar.gz
 
-# Set empty password by default
-RUN useradd -ms /bin/zsh ${USERNAME} && passwd -d ${USERNAME}
+# 设置Golang环境变量
+ENV PATH="/usr/local/go/bin:$PATH" \
+    GOPATH="/go" \
+    GOPROXY="https://goproxy.cn,direct"
+ENV PATH="$GOPATH/bin:$PATH"
 
-RUN usermod -aG sudo ${USERNAME}
-USER ${USERNAME}
-RUN mkdir -p ~/.local/share/fonts
-WORKDIR /home/${USERNAME}/.local/share/fonts
-RUN curl -L "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.3.0/JetBrainsMono.zip" -o JetBrainsMono.zip && \
-  unzip JetBrainsMono.zip && \
-  rm JetBrainsMono.zip && \
-  fc-cache -fv
+# 安装Node.js并配置npm镜像
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get update && apt-get install -y --no-install-recommends nodejs \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && npm config set registry https://registry.npmmirror.com \
+    # 初始化Git配置
+    && git config --global user.name "devbox" \
+    && git config --global user.email "719565847@qq.com"
 
-######################################################################
-#                               ZSH
-######################################################################
+# 创建工作目录
+WORKDIR /workspace
 
-# TODO: this seems odd that I have to specifically run this as root
-USER root
-COPY .config/.zshrc /home/${USERNAME}/.zshrc
-RUN chmod a+rwx /home/${USERNAME}/.zshrc
-COPY .config/.p10k.zsh /home/${USERNAME}/.p10k.zsh
-RUN chmod a+rwx /home/${USERNAME}/.p10k.zsh
-USER ${USERNAME}
+# 暴露SSH端口
+EXPOSE 22
 
-RUN echo 'export SHELL="/bin/zsh"' >> /home/${USERNAME}/.zshrc
-RUN git clone https://github.com/ohmyzsh/ohmyzsh.git ~/.oh-my-zsh
-RUN git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.powerlevel10k
-
-######################################################################
-#                               RUST
-######################################################################
-
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-RUN ~/.cargo/bin/cargo install \
-  cargo-nextest \
-  ripgrep
-RUN ~/.cargo/bin/rustup component add rustfmt
-
-######################################################################
-#                               PYTHON
-######################################################################
-
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
-RUN ~/.local/bin/uv tool install ruff
-
-######################################################################
-#                               LAZYGIT
-######################################################################
-
-RUN mkdir -p /tmp/lazygit
-WORKDIR /tmp/lazygit
-RUN curl -L "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz" -o lazygit.tar.gz && \
-  tar -xzf lazygit.tar.gz && \
-  mkdir -p ~/.bin && \
-  mv lazygit ~/.bin/lazygit
-ENV PATH="$PATH:~/.bin"
-RUN echo 'export PATH="$PATH:/home/'"${USERNAME}"'/bin"' >> ~/.zshrc
-RUN mkdir -p ~/.config/lazygit && \
-  echo "disableStartupPopups: true" >> ~/.config/lazygit/config.yml
-RUN git config --global user.name ${GIT_USERNAME} && \
-  git config --global user.email ${GIT_EMAIL} && \
-  git config --global init.defaultbranch ${GIT_DEFAULT_BRANCH} && \
-  git config --global core.editor "nvim"
-
-######################################################################
-#                               YAZI
-######################################################################
-
-RUN mkdir -p /tmp/yazi
-WORKDIR /tmp/yazi
-RUN curl -L "https://github.com/sxyazi/yazi/releases/download/v${YAZI_VERSION}/yazi-x86_64-unknown-linux-gnu.zip" -o yazi.zip && \
-  unzip yazi.zip && \
-  mv yazi-x86_64-unknown-linux-gnu ~/.bin/yazi
-ENV PATH="$PATH:~/.bin/yazi"
-RUN echo 'export PATH="$PATH:/home/'"${USERNAME}"'/.bin/yazi"' >> ~/.zshrc
-COPY --chown=${USERNAME}:${USERNAME} scripts/yazi-cd.sh /tmp/yazi/
-RUN cat yazi-cd.sh >> ~/.zshrc
-
-######################################################################
-#                               NEOVIM
-######################################################################
-
-RUN mkdir -p /tmp/neovim
-WORKDIR /tmp/neovim
-# For some reason -O is not passing the checksum
-RUN curl -L "https://github.com/neovim/neovim/releases/download/v${NEOVIM_RELEASE_VERSION}/nvim-linux64.tar.gz" -o nvim-linux64.tar.gz && \
-  echo "${NEOVIM_SHA256} nvim-linux64.tar.gz" | sha256sum -c - && \
-  tar -xzf nvim-linux64.tar.gz && \
-  mv nvim-linux64 ~/.bin/nvim
-ENV PATH="$PATH:~/.bin/nvim/bin"
-RUN echo 'export PATH="$PATH:/home/'"${USERNAME}"'/.bin/nvim/bin"' >> ~/.zshrc
-
-COPY --chown=${USERNAME}:${USERNAME} .config/nvim /home/${USERNAME}/.config/nvim
-
-# TODO: even though this is on the path, it can't find it?
-# TODO: why is MasonInstallAll not working correctly?
-RUN ~/.bin/nvim/bin/nvim --headless +Lazy sync +qall
-RUN ~/.bin/nvim/bin/nvim --headless -c "MasonInstallAll" +qall
-RUN ~/.bin/nvim/bin/nvim --headless -c "MasonInstall rust-analyzer ruff ruff-lsp codelldb debugpy pyright" +qall
-RUN ~/.bin/nvim/bin/nvim --headless "+TSInstallSync! rust python" +qa
-
-# For some reason Treesitter sync above isn't actually doing anything,
-# so instead let's open a file that treesitter would highlight and have it do stuff.
-# We do an arbitrary long 15s wait because actually quering treesitter using their
-# functions does not seem to work.
-RUN ~/.bin/nvim/bin/nvim --headless -c "edit tmp.py" -c "lua vim.wait(15000)" -c "quit"
-
-
-
-######################################################################
-#                             openssh
-######################################################################
-USER root
-RUN echo 'PermitRootLogin yes' >> /etc/ssh/sshd_config
-RUN echo 'sudo service ssh start' >> /home/${USERNAME}/.zshrc
-# RUN sudo service ssh enable
-# RUN sudo service ssh start
-######################################################################
-#                              conda
-######################################################################
-USER ${USERNAME}
-RUN cd ~
-RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh
-
-RUN bash ./Miniconda3-latest-Linux-x86_64.sh -b
-RUN echo 'export PATH="$PATH:/home/'"${USERNAME}"'/miniconda3/bin"' >> /home/${USERNAME}/.zshrc
-######################################################################
-#                               FINISH
-######################################################################
-WORKDIR /home/${USERNAME}
-#ENTRYPOINT ["/bin/zsh", "-c", "set -e; echo 'Please set a password:'; passwd $USER; exec /bin/zsh"]
-ENTRYPOINT [ "/bin/zsh" ]
+# 启动SSH服务
+CMD ["/usr/sbin/sshd", "-D"]
