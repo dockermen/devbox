@@ -84,12 +84,14 @@ if [ ! -z "$SSHINFO" ]; then\n\
   echo "$SSHINFO" > /root/.ssh/authorized_keys\n\
   chmod 600 /root/.ssh/authorized_keys\n\
   echo "SSH authorized_keys已更新"\n\
+  # 删除SHELL环境变量\n\
+  unset SSHINFO\n\
+  echo "SSHINFO环境变量已删除"\n\
 fi\n\
 /usr/sbin/sshd\n\
 echo "SSH服务已启动"\n\
 # 保持容器运行\n\
 tail -f /dev/null' > /start.sh && chmod +x /start.sh
-
 # 启动SSH服务
 CMD ["/start.sh"]
 
