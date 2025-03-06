@@ -67,11 +67,22 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && git config --global user.name "devbox" \
     && git config --global user.email "719565847@qq.com"
 
+# 创建SSH目录
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
 # 创建工作目录
 WORKDIR /workspace
 
 # 暴露SSH端口
 EXPOSE 22
+
+# 创建启动脚本
+RUN echo '#!/bin/bash\n\
+if [ ! -z "$SSHINFO" ]; then\n\
+  echo "$SSHINFO" > /root/.ssh/authorized_keys\n\
+  chmod 600 /root/.ssh/authorized_keys\n\
+  echo "SSH authorized_keys已更新"\n\
+fi\n\
+/usr/sbin/sshd -D' > /start.sh && chmod +x /start.sh
 
 # 启动SSH服务
 CMD ["/usr/sbin/sshd", "-D"]
