@@ -85,4 +85,7 @@ fi\n\
 /usr/sbin/sshd -D' > /start.sh && chmod +x /start.sh
 
 # 启动SSH服务
-CMD ["/usr/sbin/sshd", "-D"]
+CMD ["/start.sh"]
+
+# 启动SSH服务
+#CMD ["/usr/sbin/sshd", "-D"]
