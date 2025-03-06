@@ -12,7 +12,8 @@
 FROM ubuntu:latest
 
 ARG SSHINFO
-RUN echo $SSHINFO
+
+RUN echo "HELLO" && echo $SSHINFO
 # 避免交互式提示
 ENV DEBIAN_FRONTEND=noninteractive
 
