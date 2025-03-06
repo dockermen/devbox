@@ -85,7 +85,10 @@ if [ ! -z "$SSHINFO" ]; then\n\
   chmod 600 /root/.ssh/authorized_keys\n\
   echo "SSH authorized_keys已更新"\n\
 fi\n\
-/usr/sbin/sshd -D' > /start.sh && chmod +x /start.sh
+/usr/sbin/sshd\n\
+echo "SSH服务已启动"\n\
+# 保持容器运行\n\
+tail -f /dev/null' > /start.sh && chmod +x /start.sh
 
 # 启动SSH服务
 CMD ["/start.sh"]
