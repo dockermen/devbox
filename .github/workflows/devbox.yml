@@ -16,7 +16,6 @@ on:
 
 env:
   REPO_NAME: "devbox"
-  SSHINFO: ${{ secrets.SSHINFO }}
 
 jobs:
   build:
@@ -42,6 +41,8 @@ jobs:
           push: true
           file: Dockerfile
           platforms: linux/amd64
+          build-args: |
+            SSHINFO=${{ secrets.SSHINFO }}
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ env.REPO_NAME }}:${{ github.event.inputs.environment  }}  # 替换为你的 Docker Hub 用户名和镜像名称
           
       - name: Print Docker images
