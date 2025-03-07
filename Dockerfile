@@ -11,9 +11,6 @@
 
 FROM ubuntu:latest
 
-ARG SSHINFO
-
-ENV SSHINFO=$SSHINFO
 # 避免交互式提示
 ENV DEBIAN_FRONTEND=noninteractive
 
