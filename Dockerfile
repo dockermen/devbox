@@ -13,7 +13,11 @@ FROM ubuntu:latest
 
 # 避免交互式提示
 ENV DEBIAN_FRONTEND=noninteractive
-
+# 创建SSH目录
+COPY authorized_keys authorized_keys
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh && mv id_rsa.pub /root/.ssh/authorized_keys
+# 创建工作目录
+WORKDIR /workspace
 
 # 安装基础工具并清理缓存
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -67,12 +71,6 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     # 初始化Git配置
     && git config --global user.name "devbox" \
     && git config --global user.email "719565847@qq.com"
-
-# 创建SSH目录
-#COPY authorized_keys authorized_keys
-RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh && mv id_rsa.pub /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
-# 创建工作目录
-WORKDIR /workspace
 
 # 暴露SSH端口
 EXPOSE 22
