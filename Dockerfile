@@ -17,6 +17,7 @@ ENV SSHINFO=$SSHINFO
 # 避免交互式提示
 ENV DEBIAN_FRONTEND=noninteractive
 
+
 # 安装基础工具并清理缓存
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo \
@@ -72,28 +73,13 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
 
 # 创建SSH目录
 RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
+COPY authorized_keys /root/.ssh/authorized_keys
 # 创建工作目录
 WORKDIR /workspace
 
 # 暴露SSH端口
 EXPOSE 22
 
-# 创建启动脚本
-RUN echo '#!/bin/bash\n\
-if [ ! -z "$SSHINFO" ]; then\n\
-  echo "$SSHINFO" > /root/.ssh/authorized_keys\n\
-  chmod 600 /root/.ssh/authorized_keys\n\
-  echo "SSH authorized_keys已更新"\n\
-  # 删除SHELL环境变量\n\
-  unset SSHINFO\n\
-  echo "SSHINFO环境变量已删除"\n\
-fi\n\
-/usr/sbin/sshd\n\
-echo "SSH服务已启动"\n\
-# 保持容器运行\n\
-tail -f /dev/null' > /start.sh && chmod +x /start.sh
-# 启动SSH服务
-CMD ["/start.sh"]
 
 # 启动SSH服务
-#CMD ["/usr/sbin/sshd", "-D"]
+CMD ["/usr/sbin/sshd", "-D"]
