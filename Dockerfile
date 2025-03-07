@@ -16,9 +16,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 # 创建工作目录
 WORKDIR /workspace
-# 创建SSH目录
-COPY id_rsa.pub id_rsa.pub
-RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh && mv id_rsa.pub /root/.ssh/authorized_keys
+
 # 安装基础工具并清理缓存
 RUN apt-get update && apt-get install -y --no-install-recommends \
     sudo \
@@ -72,6 +70,9 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && git config --global user.name "devbox" \
     && git config --global user.email "719565847@qq.com"
 
+# 创建SSH目录
+COPY id_rsa.pub id_rsa.pub
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh && mv id_rsa.pub /root/.ssh/authorized_keys
 # 暴露SSH端口
 EXPOSE 22
 
