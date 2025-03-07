@@ -69,7 +69,8 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && git config --global user.email "719565847@qq.com"
 
 # 创建SSH目录
-RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh && mv authorized_keys /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
+#COPY authorized_keys authorized_keys
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh && mv id_rsa.pub /root/.ssh/authorized_keys && chmod 600 /root/.ssh/authorized_keys
 # 创建工作目录
 WORKDIR /workspace
 
