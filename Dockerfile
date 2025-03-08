@@ -40,6 +40,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
     && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
 
+#安装code-server
+RUN curl -fsSL https://code-server.dev/install.sh | sh \
+  && code-server --install-extension redhat.vscode-yaml \
+  && code-server --install-extension dbaeumer.vscode-eslint \
+  && code-server --install-extension eamodio.gitlens \
+  && code-server --install-extension tencent-cloud.coding-copilot \
+  && echo done
 # 安装Miniconda、配置环境变量和镜像
 RUN wget --no-check-certificate https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh \
     && bash /tmp/miniconda.sh -b -p /opt/conda \
@@ -71,8 +78,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && git config --global user.email "719565847@qq.com"
 
 # 创建SSH目录
-COPY id_rsa.pub id_rsa.pub
-RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh && mv id_rsa.pub /root/.ssh/authorized_keys
+RUN mkdir -p /root/.ssh
 # 暴露SSH端口
 EXPOSE 22
 
