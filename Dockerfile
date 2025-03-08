@@ -38,15 +38,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && mkdir /var/run/sshd \
     && echo 'root:chen1234' | chpasswd \
     && sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config \
-    && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config
-
-#安装code-server
-RUN curl -fsSL https://code-server.dev/install.sh | sh \
-  && code-server --install-extension redhat.vscode-yaml \
-  && code-server --install-extension dbaeumer.vscode-eslint \
-  && code-server --install-extension eamodio.gitlens \
-  && code-server --install-extension tencent-cloud.coding-copilot \
-  && echo done
+    && sed -i 's/#PasswordAuthentication yes/PasswordAuthentication yes/' /etc/ssh/sshd_config \
+    && sed -i 's/#PubkeyAuthentication no/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+  
 # 安装Miniconda、配置环境变量和镜像
 RUN wget --no-check-certificate https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh \
     && bash /tmp/miniconda.sh -b -p /opt/conda \

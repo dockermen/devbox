@@ -1,8 +1,16 @@
-version: '3.8'
-
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  devbox:
     image: devbox:latest
+    container_name: devbox
+    ports:
+      - "2222:22"
+ 
+    environment:
+      - TZ=Asia/Shanghai
+
+    volumes:
+      - ~/devbox:/workspace
+      - ~/.ssh/authorized_keys:/root/.ssh/authorized_keys
+      
+    restart: always
+    network_mode: "bridge"
