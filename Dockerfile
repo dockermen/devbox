@@ -78,7 +78,7 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
     && git config --global user.email "719565847@qq.com"
 
 # 创建SSH目录
-RUN mkdir -p /root/.ssh
+RUN mkdir -p /root/.ssh && chmod 700 /root/.ssh
 # 暴露SSH端口
 EXPOSE 22
 
